@@ -1,9 +1,6 @@
 import json, re, time, importlib, sys, os
-from bs4 import BeautifulSoup
 from datetime import date, datetime
 from pathlib import Path
-from requests import request
-from requests import codes as status_codes
 from typing import Callable, Iterator
 
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
@@ -36,6 +33,7 @@ def get_data(today: date = date.today(), ops: list = base_ops) -> Iterator:
     aoc_data.mkdir()
 
   def save_daily_input(today: date) -> None:
+    request, status_codes = import_requests()
     url = f'https://adventofcode.com/{today.year}/day/{today.day}/input'
     res = request('GET', url, cookies=config)
     if res.status_code != status_codes.ok:
@@ -56,6 +54,8 @@ def get_data(today: date = date.today(), ops: list = base_ops) -> Iterator:
       yield format_line(line, ops)
 
 def submit_answer(today: date, answer: str, level: int = 1) -> None:
+  from bs4 import BeautifulSoup
+  request, status_codes = import_requests()
   url = f'https://adventofcode.com/{today.year}/day/{today.day}/answer'
   payload = {
     'level': level,
@@ -65,6 +65,10 @@ def submit_answer(today: date, answer: str, level: int = 1) -> None:
   soup = BeautifulSoup(res.content, 'html.parser')
   for content in soup.find_all('article'):
     print(content.text)
+
+def import_requests():
+  from requests import request, codes
+  return request, codes
 
 def time_fmt(delta: float) -> (float, str):
   if delta < 1e-6:
