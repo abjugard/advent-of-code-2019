@@ -1,93 +1,29 @@
 from santas_little_helpers import day, get_data, timed
+from santas_little_utils import run_vm
 from itertools import permutations
 
 today = day(2019, 7)
 
-vm_state = {}
-
 program = None
 
-def get_params(p, pc, count = 2):
-  opdata = p[pc] // 100
-  for i in range(count):
-    mode = opdata // pow(10, i) % 10
-    data = p[(pc + 1 + i) % len(p)]
-    yield p[data % len(p)] if mode is 0 else data
-  return
-
-def run_vm(vm_name, inputs):
-  if vm_name in vm_state:
-    p, pc, outputs, inp_count = vm_state[vm_name]
-  else:
-    p = program.copy()
-    pc = 0
-    outputs = []
-    inp_count = 0
-  while True:
-    opcode = p[pc] % 100
-    val1, val2 = get_params(p, pc)
-    if opcode is 1:
-      p[p[pc + 3]] = val1 + val2
-      pc += 4
-    elif opcode is 2:
-      p[p[pc + 3]] = val1 * val2
-      pc += 4
-    elif opcode is 3:
-      if inp_count >= len(inputs):
-        vm_state[vm_name] = (p, pc, outputs, inp_count)
-        return outputs, False
-      p[p[pc + 1]] = inputs[inp_count]
-      inp_count += 1
-      pc += 2
-    elif opcode is 4:
-      outputs += [val1]
-      pc += 2
-    elif opcode is 5:
-      if val1 is not 0:
-        pc = val2
-      else:
-        pc += 3
-    elif opcode is 6:
-      if val1 is 0:
-        pc = val2
-      else:
-        pc += 3
-    elif opcode is 7:
-      p[p[pc + 3]] = 1 if val1 < val2 else 0
-      pc += 4
-    elif opcode is 8:
-      p[p[pc + 3]] = 1 if val1 is val2 else 0
-      pc += 4
-    elif opcode is 99:
-      pc += 1
-      if vm_name in vm_state:
-        del vm_state[vm_name]
-      break
-    else:
-      raise NotImplementedError(f'No implementation for opcode: {opcode}')
-  return outputs, True
-
 def evaluate_sequence(phase_sequence):
-  exited_normally = False
-  outE = []
-  while not exited_normally:
-    inA = [phase_sequence[0], 0] + outE
-    outA, _ = run_vm('A', inA)
-    inB = [phase_sequence[1]] + outA
-    outB, _ = run_vm('B', inB)
-    inC = [phase_sequence[2]] + outB
-    outC, _ = run_vm('C', inC)
-    inD = [phase_sequence[3]] + outC
-    outD, _ = run_vm('D', inD)
-    inE = [phase_sequence[4]] + outD
-    outE, exited_normally = run_vm('E', inE)
-  return outE[-1]
+  vm_stdin = [[inp] for inp in phase_sequence]
+  vm_stdout = [[] for _ in range(5)]
+  vm = [run_vm(program, vm_stdin[i]) for i in range(5)]
+  out = 0
+  while True:
+    for i in range(5):
+      vm_stdin[i] += [out]
+      out = next(vm[i])
+      if out == None:
+        return vm_stdout[4][-1]
+      vm_stdout[i] += [out]
 
 def highest_thrust_signal(start, end):
   sequences = permutations(range(start, end+1))
   highest = 0
   for sequence in sequences:
-    highest = max(evaluate_sequence(list(sequence)), highest)
+    highest = max(evaluate_sequence(sequence), highest)
   return highest
 
 def main() -> None:
