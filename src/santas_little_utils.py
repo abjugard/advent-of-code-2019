@@ -69,10 +69,13 @@ def run_vm(p, inp):
       relative_base += val1
       pc += 2
     elif opcode == 99:
+      yield None
       pc += 1
       break
     else:
       raise NotImplementedError(f'No implementation for opcode: {opcode}')
 
 def get_last(generator):
-  return deque(generator, maxlen=1).pop()
+  d = deque(generator, maxlen=2)
+  d.pop()
+  return d.pop()
