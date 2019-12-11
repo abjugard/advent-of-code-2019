@@ -79,3 +79,34 @@ def get_last(generator):
   d = deque(generator, maxlen=2)
   d.pop()
   return d.pop()
+
+def ellipse(y, x, pixel_size):
+  yp = (y+2) * pixel_size
+  xp = (x+2) * pixel_size
+  return (xp, yp), (xp + pixel_size + 7, yp + pixel_size + 7)
+
+def create_image(result):
+  from PIL import Image, ImageDraw
+  pixel_size = 8
+  dimensions = ((len(result[0]) + 4) * pixel_size, (len(result) + 4) * pixel_size)
+  img = Image.new('RGBA', dimensions, (255, 255, 255, 0))
+  draw = ImageDraw.Draw(img)
+  for y, xs in enumerate(result):
+    for x, value in enumerate(xs):
+      if value == 1:
+        draw.ellipse(ellipse(y, x, pixel_size), fill='black')
+  return img
+
+def tesseract_parse(inp):
+  try:
+    import pytesseract
+    image = inp
+    if isinstance(inp, list):
+      image = create_image(inp)
+    return pytesseract.image_to_string(image, config='--psm 6')
+  except ImportError:
+    for line in inp:
+      print(''.join('█' if c == 1 else ' ' for c in line))
+    print('for cooler results, please install Pillow and pytesseract\n' \
+        + '(along with a tesseract-ocr distribution)')
+    return None
