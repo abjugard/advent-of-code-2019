@@ -8,7 +8,6 @@ ball_x = paddle_x = None
 
 def count_tiles(program):
   p = program.copy()
-  p[8] = 1006
   outputs = list(run_vm(p))
   outputs = outputs[:-1]
   m = dict()
@@ -29,7 +28,6 @@ def stdin():
 def beat_game(program):
   global ball_x, paddle_x
   p = program.copy()
-  p[8] = 1006
   p[0] = 2
   vm = run_vm(p, stdin())
   score = 0

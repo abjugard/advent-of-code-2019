@@ -14,10 +14,11 @@ def out_addr(memory, pc, relative_base, i):
   opdata = memory[pc] // 100
   mode = opdata // pow(10, i - 1) % 10
   arg = memory[pc + i]
-  if mode is 0:
+  if mode == 0:
     return arg
-  elif mode is 2:
+  elif mode == 2:
     return relative_base + arg
+  raise NotImplementedError(f'No implementation for parameter mode: {mode}')
 
 def get_iterator(variable):
   try:
@@ -63,7 +64,7 @@ def run_vm(p, inp = None):
       pc += 4
     elif opcode == 8:
       out = out_addr(memory, pc, relative_base, 3)
-      memory[out] = 1 if val1 is val2 else 0
+      memory[out] = 1 if val1 == val2 else 0
       pc += 4
     elif opcode == 9:
       relative_base += val1
