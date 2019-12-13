@@ -26,7 +26,7 @@ def get_iterator(variable):
   except TypeError:
     return get_iterator([variable])
 
-def run_vm(p, inp):
+def run_vm(p, inp = None):
   memory = defaultdict(int, zip(range(len(p)), p))
   inp_gen = get_iterator(inp)
   pc = relative_base = 0
