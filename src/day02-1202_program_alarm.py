@@ -10,9 +10,9 @@ def execute(noun = 12, verb = 2):
   pc, p[1], p[2] = 0, noun, verb
   while True:
     opcode = p[pc]
-    if opcode is 1:
+    if opcode == 1:
       res = p[p[pc + 1]] + p[p[pc + 2]]
-    elif opcode is 2:
+    elif opcode == 2:
       res = p[p[pc + 1]] * p[p[pc + 2]]
     else:
       break

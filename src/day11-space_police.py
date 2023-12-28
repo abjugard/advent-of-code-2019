@@ -43,7 +43,7 @@ def verify_result(p):
 def main() -> None:
   p = next(get_data(today, [('split', ','), ('map', int)]))
   print(f'{today} star 1 = {len(paint_hull(p).values())}')
-  star2 = verify_result(p)
+  star2 = verify_result(p).strip()
   if star2 == None:
     print(f'{today} star 2 printed in block letters')
   else:

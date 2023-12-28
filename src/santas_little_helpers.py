@@ -1,5 +1,5 @@
 import json, re, time, importlib, sys, os
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Callable, Iterator
 
@@ -116,7 +116,7 @@ def average(func: Callable, times: int = 100):
 def print_result(delta: [float], prefix: str = ''):
   multiplier, unit = time_fmt(delta)
   divider = ''
-  if prefix is not '':
+  if prefix != '':
     divider = ': '
   print(f'--- {prefix}{divider}{delta*multiplier:.2f} {unit} ---')
 

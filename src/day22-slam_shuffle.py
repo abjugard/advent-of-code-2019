@@ -1,4 +1,4 @@
-from santas_little_helpers import day, get_data, timed, alphabet, submit_answer, base_ops
+from santas_little_helpers import day, get_data, timed, base_ops
 from santas_little_utils import run_vm, get_last
 
 today = day(2019, 22)

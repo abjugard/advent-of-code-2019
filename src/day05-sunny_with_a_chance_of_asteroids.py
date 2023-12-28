@@ -1,6 +1,5 @@
 from santas_little_helpers import day, get_data, timed
 from santas_little_utils import run_vm, get_last
-from itertools import product
 
 today = day(2019, 5)
 

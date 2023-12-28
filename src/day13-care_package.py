@@ -7,8 +7,7 @@ today = day(2019, 13)
 ball_x = paddle_x = None
 
 def count_tiles(program):
-  p = program.copy()
-  outputs = list(run_vm(p))
+  outputs = list(run_vm(program))
   outputs = outputs[:-1]
   m = dict()
   for i in range(0, len(outputs), 3):
@@ -27,9 +26,8 @@ def stdin():
 
 def beat_game(program):
   global ball_x, paddle_x
-  p = program.copy()
-  p[0] = 2
-  vm = run_vm(p, stdin())
+  program[0] = 2
+  vm = run_vm(program, stdin())
   score = 0
   while True:
     x = next(vm)
