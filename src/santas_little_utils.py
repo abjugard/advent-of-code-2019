@@ -1,5 +1,11 @@
 from collections import defaultdict, deque
 
+directions_8 = [('NW', (-1, -1)), ('N', (0, -1)), ('NE', (1, -1)),
+                ('W',  (-1,  0)),                 ('E',  (1,  0)),
+                ('SW', (-1,  1)), ('S', (0,  1)), ('SE', (1,  1))]
+
+directions_4 = [('N', (0, -1)), ('W', (-1, 0)), ('E', (1, 0)), ('S', (0, 1))]
+
 def parse_instr(memory, pc, relative_base):
   yield memory[pc] % 100
   opdata = memory[pc] // 100
@@ -29,7 +35,9 @@ def get_iterator(variable):
 
 def run_vm(p, inp = None):
   memory = defaultdict(int, zip(range(len(p)), p))
-  inp_gen = get_iterator(inp)
+  inp_is_deque = type(inp) == deque
+  if not inp_is_deque:
+    inp = get_iterator(inp)
   pc = relative_base = 0
   while True:
     opcode, val1, val2 = parse_instr(memory, pc, relative_base)
@@ -43,7 +51,12 @@ def run_vm(p, inp = None):
       pc += 4
     elif opcode == 3:
       out = out_addr(memory, pc, relative_base, 1)
-      memory[out] = next(inp_gen)
+      if inp_is_deque:
+        if len(inp) == 0:
+          yield None
+        memory[out] = inp.popleft()
+      else:
+        memory[out] = next(inp)
       pc += 2
     elif opcode == 4:
       yield val1
@@ -111,3 +124,73 @@ def tesseract_parse(inp):
     print('for cooler results, please install Pillow and pytesseract\n' \
         + '(along with a tesseract-ocr distribution)')
     return None
+
+
+def build_dict_map(map_data, conv_func=None, key_func=None, criteria=None):
+  the_map = dict()
+  def get_value(c, p):
+    return c if conv_func is None else conv_func(c, p)
+  def get_key(c, p):
+    return p if key_func is None else key_func(c, p)
+  for y, xs in enumerate(map_data):
+    for x, c in enumerate(xs):
+      if criteria is None or c in criteria:
+        the_map[get_key(c, (x, y))] = get_value(c, (x, y))
+    else:
+      w = x + 1
+  else:
+    h = y + 1
+  return the_map, (w, h)
+
+
+def map_frame(w, h):
+  for x in range(w):
+    yield (x, -1)
+    yield (x, w)
+  for y in range(h):
+    yield (-1, y)
+    yield (h, y)
+  return
+
+
+def neighbours(p, borders=None, diagonals=False, labels=False):
+  def within_borders(p_n, borders):
+    if borders is None:
+      return True
+    elif isinstance(borders, dict):
+      return p_n in borders
+    elif isinstance(borders, set):
+      return p_n in borders
+    elif isinstance(borders, (list, tuple)):
+      x_n, y_n = p_n
+      h = len(borders)
+      return h > 0 and 0 <= y_n < h and 0 <= x_n < len(borders[0])
+    raise Exception(f'unknown datastructure: {type(borders)}')
+  x, y = p
+  for label, (xd, yd) in directions_8 if diagonals else directions_4:
+    p_n = x + xd, y + yd
+    if within_borders(p_n, borders):
+      yield (label, p_n) if labels else p_n
+
+
+def mul(numbers):
+  result = 1
+  for n in numbers:
+    if n == 0:
+      return 0
+    result *= n
+  return result
+
+
+def transpose(l):
+  return list(map(list, zip(*l)))
+
+
+def flatten(list_of_lists):
+  return [item for l in list_of_lists for item in l]
+
+
+def ints(num_strings, split=None):
+  if split:
+    num_strings = [s.strip() for s in num_strings.split(split)]
+  return tuple(map(int, num_strings))
